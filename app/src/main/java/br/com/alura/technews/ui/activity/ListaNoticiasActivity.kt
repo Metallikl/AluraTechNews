@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -68,13 +69,17 @@ class ListaNoticiasActivity : AppCompatActivity() {
     }
 
     private fun buscaNoticias() {
-        viewModel.buscaTodos(
-            quandoSucesso = {
-                adapter.atualiza(it)
-            }, quandoFalha = {
-                mostraErro(MENSAGEM_FALHA_CARREGAR_NOTICIAS)
-            }
-        )
+        viewModel
+            .buscaTodos()
+            .observe(this, Observer { listaNoticias->
+                adapter.atualiza(listaNoticias)
+            })
+
+//        quandoSucesso = {
+//            adapter.atualiza(it)
+//        }, quandoFalha = {
+//            mostraErro(MENSAGEM_FALHA_CARREGAR_NOTICIAS)
+//        }
     }
 
     private fun abreFormularioModoCriacao() {
