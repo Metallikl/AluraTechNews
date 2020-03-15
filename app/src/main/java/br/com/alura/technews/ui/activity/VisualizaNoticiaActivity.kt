@@ -6,11 +6,15 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import br.com.alura.technews.R
 import br.com.alura.technews.database.AppDatabase
 import br.com.alura.technews.model.Noticia
 import br.com.alura.technews.repository.NoticiaRepository
 import br.com.alura.technews.ui.activity.extensions.mostraErro
+import br.com.alura.technews.ui.viewmodel.VisualizaNoticiaViewModel
+import br.com.alura.technews.ui.viewmodel.factory.VisualizaNoticiaViewModelFactory
 import kotlinx.android.synthetic.main.activity_visualiza_noticia.*
 
 private const val NOTICIA_NAO_ENCONTRADA = "Notícia não encontrada"
@@ -24,6 +28,15 @@ class VisualizaNoticiaActivity : AppCompatActivity() {
     }
     private val repository by lazy {
         NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
+    }
+    private val viewModel by lazy {
+        val factory = VisualizaNoticiaViewModelFactory(repository)
+        ViewModelProviders.of(
+            this,
+            factory)
+            .get(VisualizaNoticiaViewModel::class.java)
+
+
     }
     private lateinit var noticia: Noticia
 
@@ -53,12 +66,21 @@ class VisualizaNoticiaActivity : AppCompatActivity() {
     }
 
     private fun buscaNoticiaSelecionada() {
-        repository.buscaPorId(noticiaId, quandoSucesso = { noticiaEncontrada ->
+
+        viewModel.buscaPorId(noticiaId).observe(this, Observer {
+            resource ->
+            val noticiaEncontrada = resource.dado
             noticiaEncontrada?.let {
                 this.noticia = it
                 preencheCampos(it)
             }
         })
+//        repository.buscaPorId(noticiaId, quandoSucesso = { noticiaEncontrada ->
+//            noticiaEncontrada?.let {
+//                this.noticia = it
+//                preencheCampos(it)
+//            }
+//        })
     }
 
     private fun verificaIdDaNoticia() {

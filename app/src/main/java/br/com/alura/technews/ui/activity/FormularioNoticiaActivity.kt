@@ -5,7 +5,6 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import br.com.alura.technews.R
 import br.com.alura.technews.database.AppDatabase
@@ -19,17 +18,18 @@ import kotlinx.android.synthetic.main.activity_formulario_noticia.*
 private const val TITULO_APPBAR_EDICAO = "Editando notícia"
 private const val TITULO_APPBAR_CRIACAO = "Criando notícia"
 private const val MENSAGEM_ERRO_SALVAR = "Não foi possível salvar notícia"
+private const val MENSAGEM_NOTICIA_NAO_ENCONTRADA = "Noticia não encontrada !"
 
 class FormularioNoticiaActivity : AppCompatActivity() {
 
     private val noticiaId: Long by lazy {
         intent.getLongExtra(NOTICIA_ID_CHAVE, 0)
     }
-    private val repository by lazy {
-        NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
-    }
+//    private val repository by lazy {
+//        NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
+//    }
     private val viewModel by lazy{
-        val factory = FormularioNoticiaViewModelFactory(repository)
+        val factory = FormularioNoticiaViewModelFactory(NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO))
         ViewModelProviders.of(this,factory)
             .get(FormularioNoticiaViewModel::class.java)
     }
@@ -50,7 +50,8 @@ class FormularioNoticiaActivity : AppCompatActivity() {
     }
 
     private fun preencheFormulario() {
-        repository.buscaPorId(noticiaId, quandoSucesso = { noticiaEncontrada ->
+        viewModel.buscaPorId(noticiaId).observe(this, Observer { resource ->
+            val noticiaEncontrada = resource.dado
             if (noticiaEncontrada != null) {
                 activity_formulario_noticia_titulo.setText(noticiaEncontrada.titulo)
                 activity_formulario_noticia_texto.setText(noticiaEncontrada.texto)
@@ -75,30 +76,13 @@ class FormularioNoticiaActivity : AppCompatActivity() {
     }
 
     private fun salva(noticia: Noticia) {
-        val falha = { _: String? ->
-            mostraErro(MENSAGEM_ERRO_SALVAR)
-        }
-        val sucesso = { _: Noticia ->
-            finish()
-        }
-
-        if (noticia.id > 0) {
-            repository.edita(
-                noticia,
-                quandoSucesso = sucesso,
-                quandoFalha = falha
-            )
-        } else {
-            viewModel.salva(noticia).observe(this, Observer { resource ->
-                //Se erro null , é sucesso
-                if(resource.erro == null) {
-                    finish()
-                }else{
-                    mostraErro(MENSAGEM_ERRO_SALVAR)
-                }
-            })
-        }
+        viewModel.salva(noticia).observe(this, Observer { resource ->
+            //Se erro null , é sucesso
+            if(resource.erro == null) {
+                finish()
+            }else{
+                mostraErro(MENSAGEM_ERRO_SALVAR)
+            }
+        })
     }
-
-
 }
