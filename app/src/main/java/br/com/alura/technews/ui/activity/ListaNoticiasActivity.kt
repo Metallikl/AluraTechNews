@@ -2,10 +2,8 @@ package br.com.alura.technews.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
@@ -77,12 +75,6 @@ class ListaNoticiasActivity : AppCompatActivity() {
                     mostraErro(MENSAGEM_FALHA_CARREGAR_NOTICIAS)
                 }
             })
-
-//        quandoSucesso = {
-//            adapter.atualiza(it)
-//        }, quandoFalha = {
-//            mostraErro(MENSAGEM_FALHA_CARREGAR_NOTICIAS)
-//        }
     }
 
     private fun abreFormularioModoCriacao() {
